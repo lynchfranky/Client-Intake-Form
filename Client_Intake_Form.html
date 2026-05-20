@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Client Intake Form — Financial Planning</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fa;
+      color: #1a2333;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── PRINT BAR ── */
+    .print-bar {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 11px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: #6b7280;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .bar-actions { display: flex; gap: 10px; }
+    .btn {
+      padding: 8px 20px;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-outline {
+      background: #fff;
+      border: 1.5px solid #d1d5db;
+      color: #374151;
+    }
+    .btn-outline:hover { background: #f9fafb; }
+    .btn-primary {
+      background: linear-gradient(135deg, #0f2352, #2d5be3);
+      color: #fff;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 36px 24px 72px;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      background: linear-gradient(135deg, #0f2352 0%, #1a3a8f 55%, #2d5be3 100%);
+      border-radius: 16px;
+      padding: 38px 44px;
+      color: #fff;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::after {
+      content:''; position:absolute; right:-50px; top:-50px;
+      width:220px; height:220px; border-radius:50%;
+      background:rgba(255,255,255,0.05);
+    }
+    .cover::before {
+      content:''; position:absolute; right:60px; bottom:-70px;
+      width:150px; height:150px; border-radius:50%;
+      background:rgba(255,255,255,0.04);
+    }
+    .cover-eyebrow {
+      font-size:0.7rem; font-weight:700; letter-spacing:2.5px;
+      text-transform:uppercase; opacity:0.65; margin-bottom:8px;
+    }
+    .cover h1 { font-size:1.9rem; font-weight:700; margin-bottom:6px; }
+    .cover .cover-sub { font-size:0.9rem; opacity:0.75; max-width:540px; line-height:1.6; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      display:flex; align-items:center; gap:0; margin-bottom:28px;
+      border-radius:10px; overflow:hidden;
+      border:1.5px solid #e5e7eb;
+      background:#fff;
+    }
+    .progress-step {
+      flex:1; text-align:center; padding:10px 6px;
+      font-size:0.72rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:0.5px;
+      color:#9ca3af; border-right:1.5px solid #e5e7eb;
+      background:#fff; transition:all 0.15s;
+    }
+    .progress-step:last-child { border-right:none; }
+    .progress-step .step-num {
+      display:block; font-size:1rem; margin-bottom:2px;
+    }
+    .progress-step.active { background:#f0f4ff; color:#2d5be3; }
+
+    /* ── SECTION CARD ── */
+    .card {
+      background:#fff; border-radius:13px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.07);
+      margin-bottom:22px; overflow:hidden;
+    }
+    .card-header {
+      display:flex; align-items:center; gap:13px;
+      padding:15px 24px; border-bottom:1px solid #eaecf0;
+    }
+    .card-icon {
+      width:38px; height:38px; border-radius:9px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.15rem; flex-shrink:0;
+    }
+    .card-header h2 { font-size:1rem; font-weight:700; }
+    .card-header .card-desc {
+      margin-left:auto; font-size:0.75rem; color:#9ca3af; font-style:italic;
+    }
+    .card-body { padding:22px 24px; }
+
+    /* Section colors */
+    .c-personal .card-header { background:#f0f4ff; }
+    .c-personal .card-icon   { background:#dce8ff; }
+    .c-household .card-header { background:#f5f0ff; }
+    .c-household .card-icon  { background:#e5d9ff; }
+    .c-goals .card-header    { background:#f0fdf4; }
+    .c-goals .card-icon      { background:#c6f0d5; }
+    .c-assets .card-header   { background:#fff7e6; }
+    .c-assets .card-icon     { background:#ffe9b3; }
+    .c-liabilities .card-header { background:#fff0f0; }
+    .c-liabilities .card-icon   { background:#ffd6d6; }
+    .c-income .card-header   { background:#f0fbff; }
+    .c-income .card-icon     { background:#c0e8f8; }
+    .c-risk .card-header     { background:#fdf4ff; }
+    .c-risk .card-icon       { background:#f0d0ff; }
+    .c-insurance .card-header { background:#fff8f0; }
+    .c-insurance .card-icon  { background:#ffdcb0; }
+    .c-notes .card-header    { background:#f9fafb; }
+    .c-notes .card-icon      { background:#e4e7ec; }
+
+    /* ── FORM FIELDS ── */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+    .grid-4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+    @media(max-width:620px) {
+      .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; }
+    }
+
+    .field { display:flex; flex-direction:column; gap:5px; margin-bottom:2px; }
+    .field + .field { margin-top:0; }
+    .row-gap { margin-top:14px; }
+
+    label.lbl {
+      font-size:0.72rem; font-weight:700;
+      color:#4b5563; text-transform:uppercase; letter-spacing:0.5px;
+    }
+    label.lbl .req { color:#dc2626; margin-left:2px; }
+
+    input[type=text], input[type=email], input[type=tel],
+    input[type=number], input[type=date], select, textarea {
+      border:1.5px solid #d1d5db;
+      border-radius:8px;
+      padding:9px 12px;
+      font-size:0.9rem;
+      color:#1a2333;
+      background:#fafbfc;
+      width:100%;
+      font-family:inherit;
+      transition:border 0.15s, background 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline:none; border-color:#2d5be3; background:#fff;
+    }
+    textarea { resize:vertical; min-height:80px; }
+    .hint { font-size:0.72rem; color:#9ca3af; margin-top:2px; }
+
+    /* ── RADIO CARD GROUP ── */
+    .radio-cards { display:grid; gap:9px; }
+    .radio-cards.cols-2 { grid-template-columns:1fr 1fr; }
+    .radio-cards.cols-1 { grid-template-columns:1fr; }
+    .radio-card input[type=radio] { display:none; }
+    .radio-card label {
+      display:flex; align-items:flex-start; gap:11px;
+      border:1.5px solid #e5e7eb; border-radius:9px;
+      padding:11px 14px; cursor:pointer;
+      transition:all 0.14s; background:#fafbfc;
+      text-transform:none; letter-spacing:0; font-weight:400;
+      font-size:0.88rem; color:#374151;
+    }
+    .radio-card label:hover { border-color:#93c5fd; background:#f0f6ff; }
+    .radio-card input:checked + label {
+      border-color:#2d5be3; background:#eff6ff; color:#1e40af;
+    }
+    .radio-card .rc-icon { font-size:1.2rem; flex-shrink:0; margin-top:1px; }
+    .radio-card .rc-text {}
+    .radio-card .rc-title { font-weight:700; font-size:0.88rem; display:block; }
+    .radio-card .rc-desc  { font-size:0.77rem; color:#6b7280; display:block; margin-top:2px; }
+    .radio-card input:checked + label .rc-desc { color:#3b82f6; }
+
+    /* ── CHECKBOX ROW ── */
+    .check-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .check-item { display:flex; align-items:center; gap:8px; }
+    .check-item input[type=checkbox] {
+      width:16px; height:16px; accent-color:#2d5be3;
+      flex-shrink:0; cursor:pointer;
+    }
+    .check-item label {
+      font-size:0.87rem; color:#374151; cursor:pointer;
+      text-transform:none; letter-spacing:0; font-weight:400;
+    }
+
+    /* ── RANGE SLIDER ── */
+    .slider-wrap { display:flex; flex-direction:column; gap:6px; }
+    .slider-labels { display:flex; justify-content:space-between; font-size:0.72rem; color:#9ca3af; }
+    input[type=range] {
+      -webkit-appearance:none; width:100%; height:6px;
+      border-radius:3px; background:#e5e7eb; outline:none;
+      border:none; padding:0;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:20px; height:20px;
+      border-radius:50%; background:#2d5be3; cursor:pointer;
+      box-shadow:0 1px 4px rgba(45,91,227,0.4);
+    }
+    .slider-value {
+      text-align:center; font-size:0.82rem;
+      font-weight:700; color:#2d5be3;
+    }
+
+    /* ── DIVIDER ── */
+    .divider { border:none; border-top:1px solid #eaecf0; margin:18px 0; }
+    .sub-label {
+      font-size:0.72rem; font-weight:700; color:#9ca3af;
+      text-transform:uppercase; letter-spacing:0.8px;
+      margin:16px 0 10px;
+    }
+
+    /* ── DOLLAR PREFIX ── */
+    .input-prefix { position:relative; }
+    .input-prefix span {
+      position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      color:#6b7280; font-size:0.9rem; pointer-events:none;
+    }
+    .input-prefix input { padding-left:24px; }
+
+    /* ── SIGNATURE / CONSENT ── */
+    .consent-box {
+      background:#f0f4ff; border:1.5px solid #bfdbfe;
+      border-radius:10px; padding:16px 20px; margin-top:8px;
+    }
+    .consent-box p { font-size:0.82rem; color:#1e40af; line-height:1.6; }
+    .consent-check { display:flex; align-items:flex-start; gap:10px; margin-top:12px; }
+    .consent-check input { margin-top:2px; width:16px; height:16px; accent-color:#2d5be3; flex-shrink:0; }
+    .consent-check label { font-size:0.84rem; color:#1e3a8a; font-weight:600; cursor:pointer; text-transform:none; letter-spacing:0; }
+
+    /* ── FORM ACTIONS ── */
+    .form-actions {
+      display:flex; gap:12px; justify-content:flex-end; margin-top:8px;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      .print-bar { display:none; }
+      body { background:#fff; }
+      .page { padding:16px 24px 40px; max-width:100%; }
+      .card { box-shadow:none; border:1px solid #e5e7eb; page-break-inside:avoid; }
+      .progress-wrap { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sticky bar -->
+<div class="print-bar no-print">
+  <span>📋 Fill out the form, then click <strong>Export to Text</strong> to generate a CRM-ready summary.</span>
+  <div class="bar-actions">
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save PDF</button>
+    <button class="btn btn-primary" onclick="exportToText()">📄 Export to Text</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-eyebrow">Financial Planning</div>
+    <h1>Client Intake Form</h1>
+    <div class="cover-sub">This form helps your advisor understand your complete financial picture so we can build a personalized plan tailored to your goals. All information is confidential.</div>
+  </div>
+
+  <!-- Progress indicator -->
+  <div class="progress-wrap">
+    <div class="progress-step active"><span class="step-num">👤</span>Personal</div>
+    <div class="progress-step active"><span class="step-num">🎯</span>Goals</div>
+    <div class="progress-step active"><span class="step-num">💰</span>Finances</div>
+    <div class="progress-step active"><span class="step-num">📊</span>Risk</div>
+    <div class="progress-step active"><span class="step-num">🛡️</span>Insurance</div>
+    <div class="progress-step active"><span class="step-num">✏️</span>Notes</div>
+  </div>
+
+  <form id="intakeForm">
+
+    <!-- ══════════════════════════════════════
+         SECTION 1 — PERSONAL INFORMATION
+    ══════════════════════════════════════ -->
+    <div class="card c-personal">
+      <div class="card-header">
+        <div class="card-icon">👤</div>
+        <h2>Personal Information</h2>
+        <span class="card-desc">Primary client</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="field"><label class="lbl">First Name <span class="req">*</span></label><input type="text" name="first_name" placeholder="John"/></div>
+          <div class="field"><label class="lbl">Middle Name</label><input type="text" name="middle_name" placeholder="(optional)"/></div>
+          <div class="field"><label class="lbl">Last Name <span class="req">*</span></label><input type="text" name="last_name" placeholder="Smith"/></div>
+        </div>
+        <div class="grid-3 row-gap">
+          <div class="field"><label class="lbl">Date of Birth <span class="req">*</span></label><input type="date" name="dob"/></div>
+          <div class="field"><label class="lbl">Social Security # (last 4)</label><input type="text" name="ssn_last4" placeholder="XXXX" maxlength="4"/></div>
+          <div class="field">
+            <label class="lbl">Marital Status</label>
+            <select name="marital_status">
+              <option value="">— Select —</option>
+              <option>Single</option>
+              <option>Married</option>
+              <option>Domestic Partnership</option>
+              <option>Divorced</option>
+              <option>Widowed</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-3 row-gap">
+          <div class="field"><label class="lbl">Email Address <span class="req">*</span></label><input type="email" name="email" placeholder="john@example.com"/></div>
+          <div class="field"><label class="lbl">Phone Number</label><input type="tel" name="phone" placeholder="(555) 000-0000"/></div>
+          <div class="field"><label class="lbl">Preferred Contact Method</label>
+            <select name="contact_method">
+              <option value="">— Select —</option>
+              <option>Email</option><option>Phone</option><option>Text</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2 row-gap">
+          <div class="field"><label class="lbl">Home Address</label><input type="text" name="address" placeholder="123 Main St"/></div>
+          <div class="field"><label class="lbl">City, State, ZIP</label><input type="text" name="city_state_zip" placeholder="Phoenix, AZ 85001"/></div>
+        </div>
+        <div class="grid-3 row-gap">
+          <div class="field"><label class="lbl">Occupation / Title</label><input type="text" name="occupation" placeholder="e.g. Software Engineer"/></div>
+          <div class="field"><label class="lbl">Employer</label><input type="text" name="employer" placeholder="e.g. Acme Corp"/></div>
+          <div class="field"><label class="lbl">Years with Employer</label><input type="number" name="years_employed" placeholder="e.g. 7" min="0"/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 2 — HOUSEHOLD / FAMILY
+    ══════════════════════════════════════ -->
+    <div class="card c-household">
+      <div class="card-header">
+        <div class="card-icon">🏠</div>
+        <h2>Household &amp; Family</h2>
+        <span class="card-desc">Spouse, partner &amp; dependents</span>
+      </div>
+      <div class="card-body">
+        <div class="sub-label">Spouse / Partner (if applicable)</div>
+        <div class="grid-3">
+          <div class="field"><label class="lbl">Full Name</label><input type="text" name="spouse_name" placeholder="Jane Smith"/></div>
+          <div class="field"><label class="lbl">Date of Birth</label><input type="date" name="spouse_dob"/></div>
+          <div class="field"><label class="lbl">Occupation</label><input type="text" name="spouse_occupation" placeholder="e.g. Teacher"/></div>
+        </div>
+        <hr class="divider"/>
+        <div class="sub-label">Dependents</div>
+        <div class="grid-4">
+          <div class="field"><label class="lbl">Number of Dependents</label><input type="number" name="num_dependents" placeholder="e.g. 2" min="0"/></div>
+          <div class="field"><label class="lbl">Ages</label><input type="text" name="dependent_ages" placeholder="e.g. 8, 12"/></div>
+          <div class="field"><label class="lbl">Relationship</label><input type="text" name="dependent_relationship" placeholder="e.g. Children"/></div>
+          <div class="field"><label class="lbl">Any Special Needs?</label>
+            <select name="special_needs">
+              <option value="">— Select —</option>
+              <option>No</option><option>Yes — details in notes</option>
+            </select>
+          </div>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Other Household Notes</label>
+          <input type="text" name="household_notes" placeholder="e.g. Caring for aging parent, planning to have more children..."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 3 — GOALS & OBJECTIVES
+    ══════════════════════════════════════ -->
+    <div class="card c-goals">
+      <div class="card-header">
+        <div class="card-icon">🎯</div>
+        <h2>Financial Goals &amp; Objectives</h2>
+        <span class="card-desc">What matters most to you</span>
+      </div>
+      <div class="card-body">
+        <div class="sub-label">Select all that apply</div>
+        <div class="check-grid">
+          <div class="check-item"><input type="checkbox" name="goal_retirement" id="g1"/><label for="g1">Retirement planning</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_college" id="g2"/><label for="g2">College / education funding</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_home" id="g3"/><label for="g3">Buy / upgrade a home</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_debt" id="g4"/><label for="g4">Pay off debt</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_estate" id="g5"/><label for="g5">Estate planning &amp; legacy</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_business" id="g6"/><label for="g6">Business planning / exit</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_tax" id="g7"/><label for="g7">Tax reduction strategies</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_insurance" id="g8"/><label for="g8">Insurance / risk protection</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_charity" id="g9"/><label for="g9">Charitable giving</label></div>
+          <div class="check-item"><input type="checkbox" name="goal_wealth" id="g10"/><label for="g10">Grow / protect wealth</label></div>
+        </div>
+
+        <hr class="divider"/>
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Target Retirement Age</label>
+            <input type="number" name="retirement_age" placeholder="e.g. 65" min="40" max="85"/>
+          </div>
+          <div class="field">
+            <label class="lbl">Desired Retirement Income / Year</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="retirement_income" placeholder="e.g. 150,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Time Horizon</label>
+            <select name="time_horizon">
+              <option value="">— Select —</option>
+              <option>Short-term (0–3 years)</option>
+              <option>Medium-term (3–10 years)</option>
+              <option>Long-term (10–20 years)</option>
+              <option>Very long-term (20+ years)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field row-gap">
+          <label class="lbl">Describe your most important financial goal in your own words</label>
+          <textarea name="top_goal" placeholder="e.g. I want to retire at 60 with enough income to maintain our current lifestyle, fund both kids through college, and leave something meaningful for the next generation..."></textarea>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Any upcoming major life events or financial milestones?</label>
+          <input type="text" name="life_events" placeholder="e.g. Selling a business in 3 years, child starting college in 2025, expecting an inheritance..."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 4 — ASSETS
+    ══════════════════════════════════════ -->
+    <div class="card c-assets">
+      <div class="card-header">
+        <div class="card-icon">💰</div>
+        <h2>Assets</h2>
+        <span class="card-desc">What you own (approximate values are fine)</span>
+      </div>
+      <div class="card-body">
+        <div class="sub-label">Liquid / Investment Assets</div>
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Checking &amp; Savings Accounts</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_checking" placeholder="e.g. 50,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Brokerage / Taxable Accounts</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_brokerage" placeholder="e.g. 120,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">401(k) / 403(b)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_401k" placeholder="e.g. 280,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">IRA / Rollover IRA</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_ira" placeholder="e.g. 95,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Roth IRA</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_roth" placeholder="e.g. 40,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">529 / Education Accounts</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_529" placeholder="e.g. 30,000"/></div>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <div class="sub-label">Real Estate &amp; Other Assets</div>
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Primary Residence (Est. Value)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_home" placeholder="e.g. 650,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Investment / Rental Property</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_realestate" placeholder="e.g. 350,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Business / Equity Interests</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_business" placeholder="e.g. 500,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Stock Options / RSUs / ESOP</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_equity_comp" placeholder="e.g. 200,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Life Insurance (Cash Value)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_lifeins" placeholder="e.g. 80,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Other Assets</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="asset_other" placeholder="e.g. Collectibles, vehicles..."/></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 5 — LIABILITIES
+    ══════════════════════════════════════ -->
+    <div class="card c-liabilities">
+      <div class="card-header">
+        <div class="card-icon">📋</div>
+        <h2>Liabilities</h2>
+        <span class="card-desc">What you owe</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Mortgage Balance</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_mortgage" placeholder="e.g. 380,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Mortgage Rate &amp; Type</label>
+            <input type="text" name="liab_mortgage_rate" placeholder="e.g. 3.5% fixed, 28 yrs left"/>
+          </div>
+          <div class="field">
+            <label class="lbl">Home Equity Loan / HELOC</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_heloc" placeholder="e.g. 50,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Auto Loan(s)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_auto" placeholder="e.g. 18,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Student Loans</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_student" placeholder="e.g. 35,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Credit Card Debt</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_cc" placeholder="e.g. 5,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Business Loans</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_business" placeholder="e.g. 100,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Other Liabilities</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="liab_other" placeholder="e.g. Personal loan..."/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Any debts you want to prioritize paying off?</label>
+            <input type="text" name="liab_priority" placeholder="e.g. Student loans within 5 years"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 6 — INCOME & CASH FLOW
+    ══════════════════════════════════════ -->
+    <div class="card c-income">
+      <div class="card-header">
+        <div class="card-icon">💵</div>
+        <h2>Income &amp; Cash Flow</h2>
+        <span class="card-desc">Annual figures unless noted</span>
+      </div>
+      <div class="card-body">
+        <div class="sub-label">Income Sources</div>
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Primary Salary / Wages (Gross)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_salary" placeholder="e.g. 175,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Spouse / Partner Income (Gross)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_spouse" placeholder="e.g. 80,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Bonus / Commission (Est.)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_bonus" placeholder="e.g. 30,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Business / Self-Employment Income</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_business" placeholder="e.g. 120,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Rental Income</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_rental" placeholder="e.g. 24,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Other Income</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="income_other" placeholder="e.g. Alimony, royalties..."/></div>
+          </div>
+        </div>
+        <hr class="divider"/>
+        <div class="sub-label">Spending &amp; Savings</div>
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Monthly Living Expenses</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="expenses_monthly" placeholder="e.g. 8,500"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Annual Savings (Approx.)</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="savings_annual" placeholder="e.g. 45,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Monthly 401(k) / Retirement Contribution</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="contrib_retirement" placeholder="e.g. 2,000"/></div>
+          </div>
+        </div>
+        <div class="grid-2 row-gap">
+          <div class="field">
+            <label class="lbl">Emergency Fund Status</label>
+            <select name="emergency_fund">
+              <option value="">— Select —</option>
+              <option>Fully funded (6+ months expenses)</option>
+              <option>Partially funded (3–6 months)</option>
+              <option>Underfunded (&lt;3 months)</option>
+              <option>None in place</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Tax Filing Status</label>
+            <select name="tax_filing">
+              <option value="">— Select —</option>
+              <option>Single</option>
+              <option>Married Filing Jointly</option>
+              <option>Married Filing Separately</option>
+              <option>Head of Household</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 7 — RISK TOLERANCE
+    ══════════════════════════════════════ -->
+    <div class="card c-risk">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <h2>Risk Tolerance Assessment</h2>
+        <span class="card-desc">Help us understand how you feel about investment risk</span>
+      </div>
+      <div class="card-body">
+
+        <!-- Q1 -->
+        <div class="sub-label">Q1 — If your portfolio dropped 20% in a single year, you would:</div>
+        <div class="radio-cards cols-2">
+          <div class="radio-card"><input type="radio" name="risk_q1" id="rq1a" value="Sell everything to avoid further losses"/><label for="rq1a"><span class="rc-icon">😨</span><span class="rc-text"><span class="rc-title">Sell everything</span><span class="rc-desc">Avoid further losses immediately</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q1" id="rq1b" value="Sell some investments to reduce risk"/><label for="rq1b"><span class="rc-icon">😟</span><span class="rc-text"><span class="rc-title">Sell some investments</span><span class="rc-desc">Reduce risk but stay partially invested</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q1" id="rq1c" value="Hold steady and wait for recovery"/><label for="rq1c"><span class="rc-icon">😐</span><span class="rc-text"><span class="rc-title">Hold steady</span><span class="rc-desc">Wait for the market to recover</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q1" id="rq1d" value="Buy more — it's a great opportunity"/><label for="rq1d"><span class="rc-icon">😊</span><span class="rc-text"><span class="rc-title">Buy more</span><span class="rc-desc">It's a buying opportunity</span></span></label></div>
+        </div>
+
+        <hr class="divider"/>
+        <!-- Q2 -->
+        <div class="sub-label">Q2 — Which investment outcome best matches your preference?</div>
+        <div class="radio-cards cols-1">
+          <div class="radio-card"><input type="radio" name="risk_q2" id="rq2a" value="Low risk: small, stable gains with minimal chance of loss"/><label for="rq2a"><span class="rc-icon">🟢</span><span class="rc-text"><span class="rc-title">Low risk</span><span class="rc-desc">Small, stable gains with minimal chance of loss</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q2" id="rq2b" value="Moderate risk: moderate gains with some possibility of loss"/><label for="rq2b"><span class="rc-icon">🟡</span><span class="rc-text"><span class="rc-title">Moderate risk</span><span class="rc-desc">Moderate gains with some possibility of loss</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q2" id="rq2c" value="Higher risk: higher potential gains with a greater chance of loss"/><label for="rq2c"><span class="rc-icon">🟠</span><span class="rc-text"><span class="rc-title">Higher risk</span><span class="rc-desc">Higher potential gains with a greater chance of loss</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q2" id="rq2d" value="Aggressive growth: maximize long-term returns and accept significant short-term volatility"/><label for="rq2d"><span class="rc-icon">🔴</span><span class="rc-text"><span class="rc-title">Aggressive growth</span><span class="rc-desc">Maximize long-term returns, accept significant short-term volatility</span></span></label></div>
+        </div>
+
+        <hr class="divider"/>
+        <!-- Q3 -->
+        <div class="sub-label">Q3 — How would you describe your investment experience?</div>
+        <div class="radio-cards cols-2">
+          <div class="radio-card"><input type="radio" name="risk_q3" id="rq3a" value="Little to none"/><label for="rq3a"><span class="rc-icon">🌱</span><span class="rc-text"><span class="rc-title">Little to none</span><span class="rc-desc">New to investing</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q3" id="rq3b" value="Some experience"/><label for="rq3b"><span class="rc-icon">📘</span><span class="rc-text"><span class="rc-title">Some experience</span><span class="rc-desc">Familiar with basic concepts</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q3" id="rq3c" value="Experienced"/><label for="rq3c"><span class="rc-icon">📈</span><span class="rc-text"><span class="rc-title">Experienced</span><span class="rc-desc">Comfortable with market cycles</span></span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_q3" id="rq3d" value="Very experienced"/><label for="rq3d"><span class="rc-icon">🏦</span><span class="rc-text"><span class="rc-title">Very experienced</span><span class="rc-desc">Sophisticated investor</span></span></label></div>
+        </div>
+
+        <hr class="divider"/>
+        <!-- Slider -->
+        <div class="sub-label">Q4 — On a scale of 1–10, how important is capital preservation vs. growth?</div>
+        <div class="slider-wrap">
+          <input type="range" name="risk_slider" id="riskSlider" min="1" max="10" value="5"
+            oninput="document.getElementById('sliderDisplay').textContent = this.value"/>
+          <div class="slider-labels">
+            <span>1 — Preserve capital above all</span>
+            <span>10 — Maximize growth at all costs</span>
+          </div>
+          <div class="slider-value">Current: <span id="sliderDisplay">5</span> / 10</div>
+        </div>
+
+        <hr class="divider"/>
+        <!-- Overall self-assessment -->
+        <div class="sub-label">Q5 — Overall self-assessed risk tolerance</div>
+        <div class="radio-cards cols-1" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+          <div class="radio-card"><input type="radio" name="risk_overall" id="ro1" value="Conservative"/><label for="ro1" style="flex-direction:column;text-align:center;justify-content:center;"><span class="rc-icon">🛡️</span><span class="rc-title" style="font-size:0.8rem;">Conservative</span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_overall" id="ro2" value="Moderately Conservative"/><label for="ro2" style="flex-direction:column;text-align:center;justify-content:center;"><span class="rc-icon">⚖️</span><span class="rc-title" style="font-size:0.8rem;">Mod. Conservative</span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_overall" id="ro3" value="Moderate"/><label for="ro3" style="flex-direction:column;text-align:center;justify-content:center;"><span class="rc-icon">📊</span><span class="rc-title" style="font-size:0.8rem;">Moderate</span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_overall" id="ro4" value="Moderately Aggressive"/><label for="ro4" style="flex-direction:column;text-align:center;justify-content:center;"><span class="rc-icon">🚀</span><span class="rc-title" style="font-size:0.8rem;">Mod. Aggressive</span></label></div>
+          <div class="radio-card"><input type="radio" name="risk_overall" id="ro5" value="Aggressive"/><label for="ro5" style="flex-direction:column;text-align:center;justify-content:center;"><span class="rc-icon">🔥</span><span class="rc-title" style="font-size:0.8rem;">Aggressive</span></label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 8 — INSURANCE
+    ══════════════════════════════════════ -->
+    <div class="card c-insurance">
+      <div class="card-header">
+        <div class="card-icon">🛡️</div>
+        <h2>Insurance Coverage</h2>
+        <span class="card-desc">Current policies in place</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Life Insurance</label>
+            <select name="ins_life">
+              <option value="">— Select —</option>
+              <option>Term — personal policy</option>
+              <option>Whole / Universal (permanent)</option>
+              <option>Employer-provided only</option>
+              <option>None</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Life Insurance Coverage Amount</label>
+            <div class="input-prefix"><span>$</span><input type="text" name="ins_life_amount" placeholder="e.g. 1,000,000"/></div>
+          </div>
+          <div class="field">
+            <label class="lbl">Policy Expiration / Type</label>
+            <input type="text" name="ins_life_detail" placeholder="e.g. 20-yr term, expires 2038"/>
+          </div>
+          <div class="field">
+            <label class="lbl">Disability Insurance (DI)</label>
+            <select name="ins_di">
+              <option value="">— Select —</option>
+              <option>Own-occupation policy</option>
+              <option>Employer group plan only</option>
+              <option>Both personal &amp; group</option>
+              <option>None</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Long-Term Care (LTC)</label>
+            <select name="ins_ltc">
+              <option value="">— Select —</option>
+              <option>Standalone LTC policy</option>
+              <option>Hybrid life/LTC policy</option>
+              <option>None — self-insuring</option>
+              <option>None — not yet considered</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Umbrella / Liability</label>
+            <select name="ins_umbrella">
+              <option value="">— Select —</option>
+              <option>In place</option>
+              <option>Not in place</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Health Insurance Source</label>
+            <select name="ins_health">
+              <option value="">— Select —</option>
+              <option>Employer (self)</option>
+              <option>Employer (spouse)</option>
+              <option>Marketplace / ACA</option>
+              <option>Medicare</option>
+              <option>Self-pay / other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">HSA in Place?</label>
+            <select name="ins_hsa">
+              <option value="">— Select —</option>
+              <option>Yes — actively contributing</option>
+              <option>Yes — not contributing</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Other Insurance Notes</label>
+            <input type="text" name="ins_other" placeholder="e.g. Key-man, E&O, malpractice..."/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 9 — ESTATE / LEGAL
+    ══════════════════════════════════════ -->
+    <div class="card c-household">
+      <div class="card-header">
+        <div class="card-icon">🏛️</div>
+        <h2>Estate &amp; Legal Documents</h2>
+        <span class="card-desc">Existing documents and beneficiaries</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-3">
+          <div class="field">
+            <label class="lbl">Will</label>
+            <select name="estate_will">
+              <option value="">— Select —</option>
+              <option>In place — current</option>
+              <option>In place — needs update</option>
+              <option>None</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Revocable Living Trust</label>
+            <select name="estate_trust">
+              <option value="">— Select —</option>
+              <option>In place — current</option>
+              <option>In place — needs update</option>
+              <option>None</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Durable Power of Attorney</label>
+            <select name="estate_poa">
+              <option value="">— Select —</option>
+              <option>In place</option>
+              <option>Not in place</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Healthcare Directive / Living Will</label>
+            <select name="estate_hcd">
+              <option value="">— Select —</option>
+              <option>In place</option>
+              <option>Not in place</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Beneficiary Designations</label>
+            <select name="estate_bene">
+              <option value="">— Select —</option>
+              <option>Current — reviewed recently</option>
+              <option>Not recently reviewed</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Estate Attorney on File?</label>
+            <select name="estate_attorney">
+              <option value="">— Select —</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </div>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Key beneficiaries / heirs (names or description)</label>
+          <input type="text" name="estate_beneficiaries" placeholder="e.g. Spouse Jane Smith (primary), children as contingent"/>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Any charitable or legacy wishes?</label>
+          <input type="text" name="estate_charity" placeholder="e.g. Donate 10% to local food bank, endow a scholarship..."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECTION 10 — ADDITIONAL NOTES
+    ══════════════════════════════════════ -->
+    <div class="card c-notes">
+      <div class="card-header">
+        <div class="card-icon">✏️</div>
+        <h2>Additional Notes &amp; Questions</h2>
+        <span class="card-desc">Anything else we should know</span>
+      </div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="field">
+            <label class="lbl">Do you work with a CPA / Tax Advisor?</label>
+            <select name="has_cpa">
+              <option value="">— Select —</option>
+              <option>Yes — active relationship</option>
+              <option>Yes — only at tax time</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Do you have an Estate / Legal Attorney?</label>
+            <select name="has_attorney">
+              <option value="">— Select —</option>
+              <option>Yes</option><option>No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">How did you hear about us?</label>
+            <select name="referral_source">
+              <option value="">— Select —</option>
+              <option>Referral from friend / family</option>
+              <option>Referral from professional</option>
+              <option>Google / Search</option>
+              <option>Social media</option>
+              <option>Event / seminar</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Have you worked with a financial advisor before?</label>
+            <select name="prev_advisor">
+              <option value="">— Select —</option>
+              <option>Yes — currently with another advisor</option>
+              <option>Yes — in the past</option>
+              <option>No — first time</option>
+            </select>
+          </div>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">What is your biggest financial concern or worry right now?</label>
+          <textarea name="biggest_concern" placeholder="e.g. I'm worried we're not saving enough for retirement and I don't know if we're on track..."></textarea>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Questions you'd like answered in our first meeting</label>
+          <textarea name="questions_for_advisor" placeholder="e.g. Should I pay off my mortgage early or invest the difference? Am I taking advantage of all tax-saving strategies available to me?"></textarea>
+        </div>
+        <div class="field row-gap">
+          <label class="lbl">Anything else you'd like us to know?</label>
+          <textarea name="other_notes" placeholder="e.g. Going through a divorce, planning to retire early, have a complex business structure..."></textarea>
+        </div>
+
+        <hr class="divider"/>
+        <!-- Consent -->
+        <div class="consent-box">
+          <p>By submitting this form, I confirm that the information provided is accurate to the best of my knowledge. I understand this information will be kept confidential and used solely for the purpose of developing a financial plan and providing financial advisory services.</p>
+          <div class="consent-check">
+            <input type="checkbox" name="consent" id="consent"/>
+            <label for="consent">I confirm the above and consent to the use of this information for financial planning purposes.</label>
+          </div>
+        </div>
+
+        <div class="grid-2 row-gap">
+          <div class="field">
+            <label class="lbl">Client Signature (type full name)</label>
+            <input type="text" name="signature" placeholder="John A. Smith"/>
+          </div>
+          <div class="field">
+            <label class="lbl">Date</label>
+            <input type="date" name="signature_date"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-outline" onclick="window.print()">🖨️ Print / Save PDF</button>
+      <button type="button" class="btn btn-outline" onclick="clearForm()">🗑️ Clear Form</button>
+      <button type="button" class="btn btn-primary" onclick="exportToText()">📄 Export to Text</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+function clearForm() {
+  if(confirm("Clear all form fields?")) document.getElementById("intakeForm").reset();
+}
+
+function val(name) {
+  const el = document.querySelector(`[name="${name}"]`);
+  if (!el) return "—";
+  if (el.type === "range") return el.value + "/10";
+  if (el.type === "checkbox") return el.checked ? "Yes" : "No";
+  return el.value.trim() || "—";
+}
+
+function radioVal(name) {
+  const checked = document.querySelector(`input[name="${name}"]:checked`);
+  return checked ? checked.value : "—";
+}
+
+function checkboxGroup(names) {
+  const selected = names.filter(n => {
+    const el = document.querySelector(`[name="${n}"]`);
+    return el && el.checked;
+  }).map(n => n.replace("goal_", "").replace(/_/g, " "));
+  return selected.length ? selected.join(", ") : "None selected";
+}
+
+function exportToText() {
+  const goalNames = ["goal_retirement","goal_college","goal_home","goal_debt","goal_estate","goal_business","goal_tax","goal_insurance","goal_charity","goal_wealth"];
+  const lines = [
+"=== CLIENT INTAKE FORM ===",
+"",
+"--- PERSONAL INFORMATION ---",
+"Name: " + val("first_name") + " " + val("middle_name") + " " + val("last_name"),
+"Date of Birth: " + val("dob"),
+"SSN (last 4): " + val("ssn_last4"),
+"Marital Status: " + val("marital_status"),
+"Email: " + val("email"),
+"Phone: " + val("phone"),
+"Preferred Contact: " + val("contact_method"),
+"Address: " + val("address") + ", " + val("city_state_zip"),
+"Occupation: " + val("occupation"),
+"Employer: " + val("employer"),
+"Years with Employer: " + val("years_employed"),
+"",
+"--- HOUSEHOLD & FAMILY ---",
+"Spouse/Partner Name: " + val("spouse_name"),
+"Spouse DOB: " + val("spouse_dob"),
+"Spouse Occupation: " + val("spouse_occupation"),
+"Number of Dependents: " + val("num_dependents"),
+"Dependent Ages: " + val("dependent_ages"),
+"Relationship: " + val("dependent_relationship"),
+"Special Needs: " + val("special_needs"),
+"Household Notes: " + val("household_notes"),
+"",
+"--- FINANCIAL GOALS ---",
+"Goals Selected: " + checkboxGroup(goalNames),
+"Target Retirement Age: " + val("retirement_age"),
+"Desired Retirement Income: $" + val("retirement_income"),
+"Time Horizon: " + val("time_horizon"),
+"Top Goal (own words): " + val("top_goal"),
+"Upcoming Life Events: " + val("life_events"),
+"",
+"--- ASSETS ---",
+"Checking & Savings: $" + val("asset_checking"),
+"Brokerage / Taxable: $" + val("asset_brokerage"),
+"401(k) / 403(b): $" + val("asset_401k"),
+"IRA / Rollover IRA: $" + val("asset_ira"),
+"Roth IRA: $" + val("asset_roth"),
+"529 / Education: $" + val("asset_529"),
+"Primary Residence: $" + val("asset_home"),
+"Investment Property: $" + val("asset_realestate"),
+"Business / Equity: $" + val("asset_business"),
+"Equity Comp (RSU/Options): $" + val("asset_equity_comp"),
+"Life Insurance Cash Value: $" + val("asset_lifeins"),
+"Other Assets: $" + val("asset_other"),
+"",
+"--- LIABILITIES ---",
+"Mortgage Balance: $" + val("liab_mortgage"),
+"Mortgage Rate & Type: " + val("liab_mortgage_rate"),
+"HELOC: $" + val("liab_heloc"),
+"Auto Loan(s): $" + val("liab_auto"),
+"Student Loans: $" + val("liab_student"),
+"Credit Card Debt: $" + val("liab_cc"),
+"Business Loans: $" + val("liab_business"),
+"Other Liabilities: $" + val("liab_other"),
+"Priority Debt Payoff: " + val("liab_priority"),
+"",
+"--- INCOME & CASH FLOW ---",
+"Primary Salary (Gross): $" + val("income_salary"),
+"Spouse/Partner Income (Gross): $" + val("income_spouse"),
+"Bonus / Commission: $" + val("income_bonus"),
+"Business / Self-Employment: $" + val("income_business"),
+"Rental Income: $" + val("income_rental"),
+"Other Income: $" + val("income_other"),
+"Monthly Living Expenses: $" + val("expenses_monthly"),
+"Annual Savings: $" + val("savings_annual"),
+"Monthly Retirement Contribution: $" + val("contrib_retirement"),
+"Emergency Fund: " + val("emergency_fund"),
+"Tax Filing Status: " + val("tax_filing"),
+"",
+"--- RISK TOLERANCE ---",
+"Q1 (Market Drop Response): " + radioVal("risk_q1"),
+"Q2 (Preferred Outcome): " + radioVal("risk_q2"),
+"Q3 (Investment Experience): " + radioVal("risk_q3"),
+"Q4 (Capital Preservation vs Growth): " + val("risk_slider"),
+"Q5 (Overall Risk Tolerance): " + radioVal("risk_overall"),
+"",
+"--- INSURANCE ---",
+"Life Insurance: " + val("ins_life"),
+"Life Insurance Amount: $" + val("ins_life_amount"),
+"Life Policy Detail: " + val("ins_life_detail"),
+"Disability Insurance: " + val("ins_di"),
+"Long-Term Care: " + val("ins_ltc"),
+"Umbrella / Liability: " + val("ins_umbrella"),
+"Health Insurance Source: " + val("ins_health"),
+"HSA: " + val("ins_hsa"),
+"Other Insurance: " + val("ins_other"),
+"",
+"--- ESTATE & LEGAL ---",
+"Will: " + val("estate_will"),
+"Revocable Trust: " + val("estate_trust"),
+"Power of Attorney: " + val("estate_poa"),
+"Healthcare Directive: " + val("estate_hcd"),
+"Beneficiary Designations: " + val("estate_bene"),
+"Estate Attorney: " + val("estate_attorney"),
+"Beneficiaries / Heirs: " + val("estate_beneficiaries"),
+"Charitable / Legacy Wishes: " + val("estate_charity"),
+"",
+"--- ADDITIONAL NOTES ---",
+"Has CPA / Tax Advisor: " + val("has_cpa"),
+"Has Estate Attorney: " + val("has_attorney"),
+"Referral Source: " + val("referral_source"),
+"Previous Advisor: " + val("prev_advisor"),
+"Biggest Financial Concern: " + val("biggest_concern"),
+"Questions for Advisor: " + val("questions_for_advisor"),
+"Other Notes: " + val("other_notes"),
+"",
+"--- CONSENT ---",
+"Consent Given: " + (document.querySelector('[name="consent"]').checked ? "Yes" : "No"),
+"Signature: " + val("signature"),
+"Date: " + val("signature_date"),
+  ];
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  const name = (val("first_name") !== "—" ? val("first_name") + "_" + val("last_name") : "Client") + "_Intake_Form";
+  a.href = url;
+  a.download = name.replace(/\s+/g,"_").replace(/[^a-zA-Z0-9_]/g,"") + ".txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
